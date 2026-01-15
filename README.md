@@ -1,5 +1,7 @@
 # FastAPI Notes App
 
+![Notes App Screenshot](sample_img_1.png)
+
 A full-stack notes application with FastAPI backend and Svelte frontend.
 
 ## 🚀 Features
