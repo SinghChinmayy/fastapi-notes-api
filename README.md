@@ -178,7 +178,3 @@ Open `http://localhost:5173` and test the UI:
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to submit issues and pull requests.
