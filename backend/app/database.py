@@ -10,7 +10,7 @@ load_dotenv()
 # Database URL
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://notesdb:notes123@localhost:5432/notesdb"
+    "postgresql://notesuser:notes123@localhost:5432/notesdb"
 )
 
 # Create SQLAlchemy engine

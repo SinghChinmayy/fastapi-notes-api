@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from routes import health as health_check
-from routes import note as note_routes
+from .routes import health as health_check
+from .routes import note as note_routes
 
 app = FastAPI()
 

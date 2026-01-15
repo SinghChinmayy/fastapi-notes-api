@@ -33,6 +33,24 @@ GET /notes/{note_id} -> get a specific note
 
 # database 
 
+Notes:
+
+Column      | Type                         | Default
+------------|------------------------------|------------------
+id          | integer (auto-increment)     | Primary Key
+title       | character varying            | NOT NULL
+content     | character varying            | NOT NULL
+created_at  | timestamp with time zone     | now()
+updated_at  | timestamp with time zone     | 
+
+
+Credentials: 
+
 name: notesdb
 user: notesuser
 pass: notes123
+
+```bash
+# To initialize the database, run:
+python -m backend.app.init_db
+```

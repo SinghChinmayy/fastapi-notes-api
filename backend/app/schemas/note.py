@@ -1,4 +1,3 @@
-# note schemas for data validation
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
@@ -15,4 +14,8 @@ class NoteFetch(BaseModel):
     id: int
     title: str
     content: str
-    created_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True  # Allows reading from SQLAlchemy models

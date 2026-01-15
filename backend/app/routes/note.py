@@ -1,66 +1,85 @@
-from fastapi import APIRouter, HTTPException, status
-from datetime import datetime
-from typing import Dict, List
+from fastapi import APIRouter, HTTPException, status, Depends
+from sqlalchemy.orm import Session
+from typing import List
 
-# Schemas for data validation
-from schemas.note import NoteCreate, NoteFetch
+from ..schemas.note import NoteCreate, NoteFetch
+from ..database import get_db
+from ..models import Note
 
 router = APIRouter()
 
-# In-memory note storage
-notes_db: Dict[int, dict] = {}
-
-# Note ID counter
-note_id_counter = 1
-
 
 @router.post("/", response_model=NoteFetch, status_code=status.HTTP_201_CREATED)
-def create_note(note: NoteCreate):
-    """
-    Create a new note
+def create_note(note: NoteCreate, db: Session = Depends(get_db)):
+    """Create a new note"""
+    # Create SQLAlchemy model instance
+    db_note = Note(
+        title=note.title,
+        content=note.content
+    )
     
-    - **title**: Title of the note
-    - **content**: Content of the note
-    """
-    global note_id_counter
+    # Add to database
+    db.add(db_note)
+    db.commit()
+    db.refresh(db_note)  # Get the generated ID and timestamps
     
-    # Create new note dictionary
-    new_note = {
-        "id": note_id_counter,
-        "title": note.title,
-        "content": note.content,
-        "created_at": datetime.now()
-    }
-    
-    # Store in database
-    notes_db[note_id_counter] = new_note
-    note_id_counter += 1
-    
-    return new_note
+    return db_note
 
 
-@router.get("/", response_model=List[NoteFetch], status_code=status.HTTP_200_OK)
-def get_all_notes():
-    """
-    Get all notes
-    
-    Returns a list of all notes stored in the system
-    """
-    return list(notes_db.values())
+@router.get("/", response_model=List[NoteFetch])
+def get_all_notes(db: Session = Depends(get_db)):
+    """Get all notes"""
+    notes = db.query(Note).all()
+    return notes
 
 
-@router.get("/{note_id}", response_model=NoteFetch, status_code=status.HTTP_200_OK)
-def get_note(note_id: int):
-    """
-    Get a single note by ID
+@router.get("/{note_id}", response_model=NoteFetch)
+def get_note(note_id: int, db: Session = Depends(get_db)):
+    """Get a single note by ID"""
+    note = db.query(Note).filter(Note.id == note_id).first()
     
-    - **note_id**: The ID of the note to retrieve
-    """
-    if note_id not in notes_db:
+    if not note:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Note with id {note_id} not found"
         )
     
-    return notes_db[note_id]
+    return note
+
+
+@router.put("/{note_id}", response_model=NoteFetch)
+def update_note(note_id: int, note_update: NoteCreate, db: Session = Depends(get_db)):
+    """Update a note"""
+    note = db.query(Note).filter(Note.id == note_id).first()
     
+    if not note:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Note with id {note_id} not found"
+        )
+    
+    # Update fields
+    note.title = note_update.title
+    note.content = note_update.content
+    
+    db.commit()
+    db.refresh(note)
+    
+    return note
+
+
+@router.delete("/{note_id}")
+def delete_note(note_id: int, db: Session = Depends(get_db)):
+    """Delete a note"""
+    note = db.query(Note).filter(Note.id == note_id).first()
+    
+    if not note:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Note with id {note_id} not found"
+        )
+    
+    db.delete(note)
+    db.commit()
+    
+    return {"message": "Note deleted successfully"}
