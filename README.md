@@ -31,3 +31,8 @@ POST /notes -> create a note
 GET /notes -> list all notes
 GET /notes/{note_id} -> get a specific note
 
+# database 
+
+name: notesdb
+user: notesuser
+pass: notes123
